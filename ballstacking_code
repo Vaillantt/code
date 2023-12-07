@@ -1,0 +1,74 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <iomanip>
+#include <limits>
+
+using namespace std;
+
+struct Ball {
+    int num2, dp;
+};
+
+int neg_infinity = numeric_limits<int>::min();
+
+int max_prize = 0;
+
+int column_sum(vector<vector<Ball>>& stack, int x, int y) {
+    int res = 0;
+
+    if (x == 0) {
+        return stack[x][y].num2;
+    }
+    return stack[x][y].num2 + column_sum(stack, x - 1, y);
+}
+
+int best_sum(vector<vector<Ball>>& stack, int x, int y) {
+
+    if (x < 0 || y < 0) {
+        return 0;
+    }
+
+    if (x == stack.size() || y == stack.size()) {
+        return neg_infinity;
+    }
+
+    if (stack[x][y].dp == 0) {
+        stack[x][y].dp = max(column_sum(stack, x, y) + best_sum(stack, x, y - 1), best_sum(stack, x + 1, y));
+        max_prize = max(max_prize, stack[x][y].dp);
+    }
+
+    return stack[x][y].dp;
+}
+
+int main() {
+    while (true) {
+        int n;
+        max_prize = 0;
+        cin >> n;
+
+        if (n == 0) {
+            break;
+        }
+
+        vector<vector<Ball>> stack(n, vector<Ball>(n));
+
+        for (int i = 0; i < n; ++i) {
+            int row = i;
+            int column = 0;
+
+            while (row >= 0 && column <= i) {
+                cin >> stack[row][column].num2;
+                row--;
+                column++;
+            }
+        }
+
+        for (int i = 0; i < n; i++) {
+            best_sum(stack, 0, i);
+        }
+        cout << max_prize << endl;
+    }
+
+    return 0;
+}
